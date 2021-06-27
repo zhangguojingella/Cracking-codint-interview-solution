@@ -1,0 +1,173 @@
+Solidify
+Why Migrate from Jira to ADO?
+Solidify Basics and Benefits
+Drawbacks
+Alternatives
+Preparing to Migrate Jira → ADO
+Overall Directions are in Solidify’s Blog
+Get the latest Solidy tool
+Create a Personal Access Token
+Solidify Configuration
+Solidify Export from Jira
+Export Command
+Exporting Initiatives and Epics
+Exporting Stories, Enhancements, Bugs, Tasks, etc.
+Solidify Import to ADO
+Import Command
+Some Trial & Error: Test & Validate
+Area Paths, Iteration Paths and Users
+Area Paths
+Iteration Paths
+Users
+Helpful Links
+Solidify
+Solidfy is a third party tool for migrating Jira tickets across to Azure Devops (ADO) which has already been used successfully within BlackRock. You can find the tool here : https://marketplace.visualstudio.com/items?itemName=solidify.jira-devops-migration
+
+Attached is a sample configuration file used successfully within BlackRock by ETF Systems.
+
+Further wikified experience details coming soon - in the meantime, see this powerpoint deck in the attachments section of this page : ADO Boards - Migrating from Jira.pptx
+
+
+
+Why Migrate from Jira to ADO?
+Investment in ADO
+One System for Issue Tracking and Source code / better integration
+Better support for Scaled Agile
+Jira
+
+Initiatives → Epics → Story (Dev Ticket)
+
+ADO
+
+Epics → Features → User Story (Dev Ticket)
+
+ADO names the work items in line with the “real world” concepts
+
+Solidify Basics and Benefits
+Uses Jira and ADO APIs to export and import respectively
+Automatically preserves Attachments
+Translates Jira types to ADO work items (e.g., Initiative to Epic)
+Simple mapping of most fields
+Preserves Links (parent/child)
+Drawbacks
+Some links were not recreated. I believe that Clone links in Jira were not handled well and could even have messed up other kinds of links
+Needed to manually reconcile
+Alternatives
+Export Jira to Excel – massage data – import to ADO – update and verify ADO work items
+
+Bifurcate: Leave old and in-progress issues in Jira and create new work items in ADO
+
+Preparing to Migrate Jira → ADO
+Overall Directions are in Solidify’s Blog
+https://solidify.dev/blog/jira-azure-devops-migration
+
+Before getting started, come up with a plan to divide and conquer
+
+Avoid importing what you don’t need
+Do you need to import Closed Jira artifacts?
+Divide your Jira exports to manageable chunks (e.g., < 1000)
+Need a Jira query for each subset
+Divide by Component and/or Type:
+"query": "Project = ETFS AND cf[14933] = 'Mt. Sharp' AND status not in (Rejected) AND component in ('ETF Basket Management’) AND type in (Initiative, Epic)“
+Create Export Directories that mirror the divisions (except for types…)
+Set up ADO Boards with new fields you might need
+Jira Link (more of an ID, than a Link)
+
+Get the latest Solidy tool
+Unchanged since last August (2020): https://github.com/solidify/jira-azuredevops-migrator/releases
+
+Create a Personal Access Token
+To access ADO via its APIs (which is what Solidy will do), you need a Personal Access Token (or PAT).
+
+You can create one in ADO:
+
+
+
+Solidify Configuration
+Solidify configurations are done in a JSON file.
+
+There is a sample configuration file in the attachments to this page!
+
+
+
+Documentation on Configurations can be found here: https://github.com/solidify/jira-azuredevops-migrator/blob/master/docs/config.md
+
+Here are some examples:
+
+Work Item Mapping Example Expand source
+Field Mapping Example Expand source
+
+
+Solidify Export from Jira
+Export Command
+Export Command
+.\jira-export.exe -u amukamal –p xxxx --url https://webster.bfm.com/jira --config .\config-esp_test1.json –force
+xxxx = your BLK password (for Jira)
+
+I did two exports per component into the same directory to handle a Linking problem.
+
+I used a separate workspace directory per component
+
+Exporting Initiatives and Epics
+"query": "Project = ETFS AND cf[14933] = 'Mt. Sharp' AND status not in (Rejected) AND component in ('ETF Basket Management’) AND type in (Initiative, Epic)",
+ 
+"workspace": "C:\\Projects\\ADO_Migration\\esp_BM",
+ 
+"epic-link-field": "Parent Link",
+Exporting Stories, Enhancements, Bugs, Tasks, etc.
+"query": "Project = ETFS AND cf[14933] = 'Mt. Sharp' AND status not in (Rejected) AND component in ('ETF Basket Management’) AND type in (Story,Enhancement,Bug,Task,'Non-Dev Task',Sub-task)",
+ 
+"workspace": "C:\\Projects\\ADO_Migration\\esp_BM",
+ 
+"epic-link-field": “Epic Link",
+
+
+Solidify Import to ADO
+Import Command
+Import Command
+.\wi-import.exe --token cuzpiwgzdbj2qg################mn67vvym7gs4prcqistuya --url https://dev.azure.com/1A4D --config .\config-esp_test1.json --force
+token is the ADO PAT
+
+After each Jira Component Export (Epics/Initiatives & Stories/Bugs) to the same directory, I imported all artifacts for that Component.
+
+This preserved most of the links from Initiative to Epic as well as Epic to Story.
+
+Some Trial & Error: Test & Validate
+Since I was able to control the export query, I was able to do multiple practice exports and imports.  If I found a field was not mapping correctly, I revised the configuration file and deleted the imported work items in ADO and retried till I was satisfied with the results.
+
+
+
+Area Paths, Iteration Paths and Users
+Area Paths
+"base-area-path": "Basket Management",
+
+In Jira, the component was used to identify the Business Segment, so that was naturally what we put in the ADO Area Path.
+
+Iteration Paths
+"base-iteration-path": "Mt Sharp",
+
+This base path was prepended to the Sprint.
+
+After the import, I used the Iteration configuration for each team to insert the Program Increment between the overall initiative (Mt Sharp) and the Sprint
+
+Users
+Fortunately, users are based on our emails / user ids and they are the same in Jira and ADO, so no additional mapping file was needed.
+
+
+
+Helpful Links
+Solidify’s Blog & Github
+
+https://solidify.dev/blog/jira-azure-devops-migration
+
+https://github.com/solidify
+
+Config readme in Github: https://github.com/solidify/jira-azuredevops-migrator/blob/master/docs/config.md
+
+Scaled Agile Framework
+
+https://www.scaledagileframework.com/
+
+Quick reference index for Azure Boards settings
+
+https://docs.microsoft.com/en-us/azure/devops/reference/quick-reference-index-boards-settings?view=azure-devops
